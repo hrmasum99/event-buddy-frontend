@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true, // 👈 this will skip ESLint errors on Vercel
   },
+
   /* config options here */
 };
 
