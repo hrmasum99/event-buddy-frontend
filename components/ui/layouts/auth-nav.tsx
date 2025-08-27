@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function AuthNavBar() {
   return (
-    <div className="flex justify-between py-4 px-10 sm:px-14 bg-[#d7daf7]">
+    <div className="flex justify-between py-4 px-6 sm:px-14 bg-[#d7daf7]">
       <div className="flex items-center gap-2">
         <Image
           src="/ticket-1.svg"

@@ -4,7 +4,7 @@ import MainNav from "./MainNav";
 
 export default function CustomNavBar() {
   return (
-    <div className="flex justify-between py-4 px-10 sm:px-14 items-center">
+    <div className="flex justify-between py-4 px-6 sm:px-14 items-center">
       {/* Left Logo + Brand */}
       <div className="flex items-center gap-2">
         <Image

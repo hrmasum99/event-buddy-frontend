@@ -16,7 +16,7 @@ export default async function EventDetails({ params }: EventDetailsProps) {
 
   if (!event) {
     return (
-      <div className="px-10 sm:px-14 my-6">
+      <div className="px-6 sm:px-14 my-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Event not found.</h1>
           <Link
@@ -32,7 +32,7 @@ export default async function EventDetails({ params }: EventDetailsProps) {
   }
 
   return (
-    <div className="px-10 sm:px-14 my-6 bg-[#FBFBFE]">
+    <div className="px-6 sm:px-14 my-6 bg-[#FBFBFE]">
       <div className="mb-6">
         <Link
           href="/"

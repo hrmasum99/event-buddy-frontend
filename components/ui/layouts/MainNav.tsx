@@ -20,6 +20,7 @@ import {
   UserRoundIcon,
   LayoutDashboard,
   MoreVertical,
+  Menu,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -153,9 +154,10 @@ export default function MainNav() {
                 <div className="sm:hidden">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
+                      {/* <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4"/>
+                      </Button> */}
+                      <Menu className="h-8 w-8 text-[#250A63]" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem asChild>

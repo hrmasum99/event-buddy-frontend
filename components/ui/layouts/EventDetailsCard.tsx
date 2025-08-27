@@ -98,7 +98,7 @@ export default function EventDetailsCard({ event }: EventDetailsCardProps) {
           </div>
         </div>
 
-        <div className="px-10 sm:px-14 md:px-32 py-6">
+        <div className="px-6 sm:px-14 md:px-32 py-6">
           <TicketGroup eventId={event.id} />
         </div>
 

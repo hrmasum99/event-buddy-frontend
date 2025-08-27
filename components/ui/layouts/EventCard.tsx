@@ -81,7 +81,7 @@ export default function EventCard({ event }: EventCardProps) {
           />
         </div>
 
-        <div className="px-2">
+        <div className="px-4">
           <div className="flex flex-row items-start gap-4 py-2">
             <div className="flex flex-col items-center justify-center">
               <span className="text-xs font-bold text-[#3D37F1]">

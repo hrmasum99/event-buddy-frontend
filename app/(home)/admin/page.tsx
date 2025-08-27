@@ -11,7 +11,7 @@ export default function AdminDashboard() {
 
   return (
     <ProtectedRoute requiredRole="admin">
-      <div className="px-10 sm:px-14 pt-2">
+      <div className="px-6 sm:px-14 pt-2">
         <div className="mb-4">
           <h5 className="text-xl text-[#242565] font-semibold">
             Admin Dashboard

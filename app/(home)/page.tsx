@@ -18,12 +18,12 @@ export default function Home() {
       </div>
 
       {/* Upcoming Events Section */}
-      <div className="px-10 sm:px-14 my-10">
+      <div className="px-6 sm:px-14 my-10">
         <UpcommingEvents />
       </div>
 
       {/* Previous Events Section */}
-      <div className="px-10 sm:px-14 my-10">
+      <div className="px-6 sm:px-14 my-10">
         <PreviousEvents />
       </div>
     </div>
