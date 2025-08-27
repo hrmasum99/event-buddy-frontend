@@ -29,21 +29,44 @@
 //   );
 // }
 
+// "use client";
+
+// import { ReactNode } from "react";
+// import { Provider } from "react-redux";
+// import { PersistGate } from "redux-persist/integration/react";
+// import { persistStore } from "redux-persist";
+// import { makeStore } from "../store";
+
+// const store = makeStore();
+// const persistor = persistStore(store);
+
+// export default function StoreProvider({ children }: { children: ReactNode }) {
+//   return (
+//     <Provider store={store}>
+//       <PersistGate loading={null} persistor={persistor}>
+//         {children}
+//       </PersistGate>
+//     </Provider>
+//   );
+// }
+
 "use client";
 
 import { ReactNode } from "react";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { persistStore } from "redux-persist";
-import { makeStore } from "../store";
+import { store, persistor } from "../store";
 
-const store = makeStore();
-const persistor = persistStore(store);
+const PersistLoading = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-pulse text-lg">Loading...</div>
+  </div>
+);
 
 export default function StoreProvider({ children }: { children: ReactNode }) {
   return (
     <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
+      <PersistGate loading={<PersistLoading />} persistor={persistor}>
         {children}
       </PersistGate>
     </Provider>

@@ -6,17 +6,30 @@ import {
   NavigationMenuItem,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/redux/customHooks";
 import { logout } from "@/redux/features/authSlice";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
-import { LogOut, UserRoundIcon, LayoutDashboard } from "lucide-react";
+import {
+  LogOut,
+  UserRoundIcon,
+  LayoutDashboard,
+  MoreVertical,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
+import { useState, useCallback } from "react";
 
 export default function MainNav() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const {
     isAuthenticated,
@@ -29,10 +42,22 @@ export default function MainNav() {
     getRole,
   } = useAuth();
 
-  const handleLogout = () => {
+  // Remove manual initialization - Redux Persist handles this
+
+  const handleLogout = useCallback(() => {
+    if (isLoggingOut) return; // Prevent double clicks
+
+    setIsLoggingOut(true);
+
+    // Dispatch logout action (synchronous)
     dispatch(logout());
-    router.push("/");
-  };
+
+    // Use requestAnimationFrame to ensure DOM updates before navigation
+    requestAnimationFrame(() => {
+      router.push("/");
+      setIsLoggingOut(false);
+    });
+  }, [dispatch, router, isLoggingOut]);
 
   // Show loading state during initial hydration
   if (!isHydrated) {
@@ -41,7 +66,14 @@ export default function MainNav() {
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem className="flex gap-4 items-center">
-              <div className="animate-pulse">Loading...</div>
+              <div className="flex gap-2">
+                <Button className="bg-[#4157FE] text-white hover:bg-[#7B8BFF]">
+                  <Link href="/signin">Sign in</Link>
+                </Button>
+                <Button className="bg-[#4157FE] text-white hover:bg-[#7B8BFF]">
+                  <Link href="/signup">Sign up</Link>
+                </Button>
+              </div>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
@@ -65,7 +97,7 @@ export default function MainNav() {
                 </Button>
               </div>
             ) : (
-              // Authenticated - Show user info, dashboard, and logout
+              // Authenticated - Show user info and responsive navigation
               <>
                 <div className="flex gap-2 items-center">
                   <Avatar className="rounded-full border border-[#250A63] w-8 h-8 flex items-center justify-center">
@@ -93,25 +125,59 @@ export default function MainNav() {
                   </div>
                 </div>
 
-                {/* Dashboard Button - Role-based routing */}
-                <Button
-                  className="bg-[#28a745] text-white hover:bg-[#218838] flex gap-1 items-center"
-                  asChild
-                >
-                  <Link href={getDashboardRoute()}>
-                    <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
-                  </Link>
-                </Button>
+                {/* Desktop Navigation - Hidden on small screens */}
+                <div className="hidden sm:flex gap-2">
+                  {/* Dashboard Button - Role-based routing */}
+                  <Button
+                    className="bg-[#28a745] text-white hover:bg-[#218838] flex gap-1 items-center"
+                    asChild
+                  >
+                    <Link href={getDashboardRoute()}>
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </Button>
 
-                {/* Logout Button */}
-                <Button
-                  className="bg-[#4157FE] text-white hover:bg-[#7B8BFF] flex gap-1 items-center"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </Button>
+                  {/* Logout Button */}
+                  <Button
+                    className="bg-[#4157FE] text-white hover:bg-[#7B8BFF] flex gap-1 items-center disabled:opacity-50"
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {isLoggingOut ? "Logging out..." : "Logout"}
+                  </Button>
+                </div>
+
+                {/* Mobile Navigation - Three dot menu for small screens */}
+                <div className="sm:hidden">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href={getDashboardRoute()}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <LayoutDashboard className="h-4 w-4" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        {isLoggingOut ? "Logging out..." : "Logout"}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </>
             )}
           </NavigationMenuItem>

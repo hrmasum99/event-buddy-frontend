@@ -4,6 +4,7 @@ import {
   PAUSE,
   PERSIST,
   persistReducer,
+  persistStore,
   PURGE,
   REGISTER,
   REHYDRATE,
@@ -37,6 +38,9 @@ export const makeStore = () => {
     devTools: process.env.NODE_ENV !== "production", // Enable DevTools in development
   });
 };
+
+export const store = makeStore();
+export const persistor = persistStore(store);
 
 export type AppStore = ReturnType<typeof makeStore>;
 
