@@ -59,7 +59,7 @@ export default function Signin() {
     try {
       const result = await login(data).unwrap(); // This can throw RtkQueryError
 
-      if (result.success === true && !result.data?.mfa) {
+      if (result.success === true) {
         toast.success(result.message || "Login successful!");
         // Dispatch actions to store tokens and user info
         dispatch(
