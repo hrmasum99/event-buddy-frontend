@@ -1,3 +1,4 @@
+"use client";
 import { Separator } from "@radix-ui/react-separator";
 import Image from "next/image";
 import Link from "next/link";

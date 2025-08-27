@@ -169,10 +169,10 @@ const authSlice = createSlice({
         // Cookies.remove('refreshToken');
 
         // Clear localStorage if you're also storing anything there
-        if (typeof window !== "undefined") {
-          localStorage.removeItem("user");
-          localStorage.removeItem("token");
-        }
+        // if (typeof window !== "undefined") {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        // }
       } catch (error) {
         console.error("Error clearing cookies/localStorage:", error);
       }
@@ -196,25 +196,25 @@ const authSlice = createSlice({
       state.isHydrated = true;
     },
     initializeAuth: (state) => {
-      if (typeof window !== "undefined") {
-        const authData = Cookies.get(AUTH_KEY);
-        const token = Cookies.get(ACCESS_TOKEN_KEY);
+      // if (typeof window !== "undefined") {
+      const authData = Cookies.get(AUTH_KEY);
+      const token = Cookies.get(ACCESS_TOKEN_KEY);
 
-        if (authData && token) {
-          try {
-            const parsed = JSON.parse(authData);
-            state.user = parsed.user;
-            state.access_token = token;
-            state.isAuthenticated = true;
-          } catch (error) {
-            console.error("Error parsing auth data from cookies:", error);
-            // Clear corrupted cookies
-            Cookies.remove(AUTH_KEY);
-            Cookies.remove(ACCESS_TOKEN_KEY);
-          }
+      if (authData && token) {
+        try {
+          const parsed = JSON.parse(authData);
+          state.user = parsed.user;
+          state.access_token = token;
+          state.isAuthenticated = true;
+        } catch (error) {
+          console.error("Error parsing auth data from cookies:", error);
+          // Clear corrupted cookies
+          Cookies.remove(AUTH_KEY);
+          Cookies.remove(ACCESS_TOKEN_KEY);
         }
-        state.isHydrated = true;
       }
+      state.isHydrated = true;
+      // }
     },
   },
 });

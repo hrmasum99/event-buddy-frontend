@@ -15,8 +15,8 @@ const createNoopStorage = () => {
 };
 
 const storage =
-  typeof window !== "undefined"
-    ? createWebStorage("local") // Use localStorage on client
-    : createNoopStorage(); // Use noop storage on server
+  // typeof window !== "undefined" ?
+  createWebStorage("local"); // Use localStorage on client
+// : createNoopStorage(); // Use noop storage on server
 
 export default storage;
