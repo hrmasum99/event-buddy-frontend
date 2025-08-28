@@ -1,20 +1,26 @@
 import Image from "next/image";
 import UpcommingEvents from "@/components/UpcommingEvents";
 import PreviousEvents from "@/components/PreviousEvents";
+import HeroSection from "@/components/ui/layouts/HeroSection";
 
 export default function Home() {
   return (
     <div className="">
       {/* Hero Section */}
-      <div className="w-full h-auto">
+      <div className="relative">
         <Image
-          src="/Hero 03.png"
+          src="/Hero.jpg"
           alt="Hero Banner"
           width={1920}
           height={610}
           priority
-          className="w-full h-auto object-cover"
+          className="object-cover"
         />
+
+        {/* Overlapping Hero Section */}
+        {/* <div className="absolute inset-0 flex items-center justify-center"> */}
+        <HeroSection />
+        {/* </div> */}
       </div>
 
       {/* Upcoming Events Section */}

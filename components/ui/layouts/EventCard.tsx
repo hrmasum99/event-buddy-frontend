@@ -58,9 +58,27 @@ export default function EventCard({ event }: EventCardProps) {
       .filter(Boolean);
   };
 
+  // Parse Location
+  const getAddress = (locations: string) => {
+    if (!locations) return "";
+
+    const addressParts = locations
+      .split(",")
+      .map((location) => location.trim());
+    const address = addressParts.length;
+
+    if (address >= 2) {
+      return `${addressParts[address - 2]}, ${addressParts[address - 1]}`;
+    }
+
+    // If only one part exists, just return it
+    return addressParts[0] || "";
+  };
+
   const dateInfo = formatDate(event.date);
   const timeInfo = formatTime(event.date);
   const tags = parseTags(event.tags);
+  const locations = getAddress(event.location);
 
   // Get image URL with fallback
   // const displayImage = getEventImageWithFallback(event);
@@ -106,7 +124,7 @@ export default function EventCard({ event }: EventCardProps) {
           <CardContent className="p-0">
             <div className="flex sm:flex-col flex-row items-start gap-2 py-1">
               <div className="flex items-center gap-1">
-                <CalendarDays className="h-3 w-3 text-[#8570AD]" />
+                <CalendarDays className="h-4 w-4 text-[#8570AD]" />
                 <div className="flex">
                   <span className="text-xs text-[#8570AD]">
                     {dateInfo.dayName}
@@ -123,9 +141,10 @@ export default function EventCard({ event }: EventCardProps) {
 
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4 text-[#8570AD]" />
+
                 <div className="flex">
                   <span className="text-xs text-[#8570AD]">
-                    {event.location || "Location TBA"}
+                    {locations || "Location TBA"}
                   </span>
                 </div>
               </div>

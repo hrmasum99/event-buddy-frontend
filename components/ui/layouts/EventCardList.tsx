@@ -93,7 +93,7 @@ export default function EventsCardList({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-3 pt-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 sm:gap-4 pt-4">
       {events.map((event) => (
         <EventCard key={event.id} event={event} />
       ))}

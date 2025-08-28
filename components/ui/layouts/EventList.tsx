@@ -182,9 +182,9 @@ export default function EventList() {
             // <span className="text-sm text-gray-500">Loading...</span>
             <div className="w-full space-y-4">
               <div className="flex items-center justify-center h-64">
-                <span className="text-xl mr-4">Loading</span>
+                <span className="text-sm mr-2">Loading</span>
                 <svg
-                  className="animate-spin h-5 w-5 text-gray-800"
+                  className="animate-spin h-3 w-3 text-gray-800"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"

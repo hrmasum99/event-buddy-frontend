@@ -294,4 +294,35 @@
   .list-disc-primary-600 {
     @apply text-primary-600;
   }
+
+  /* .fluid-hero-heading {
+  font-size: clamp(1.25rem, 4vw, 6rem);
+  } */
+
+  
+  @media (width >= 100rem /* 1600px */) {
+    .text-mac-air {
+      font-size: 7rem /* 112px */;
+      line-height: var(--tw-leading, var(--text-8xl--line-height) /* 1 */);
+    }
+  }
+
+  @media (width >= 24rem /* 384px */) {
+    .search-bar-iphone {
+      max-width: 18rem /* 288px */;
+    }
+  }
+
+  .search-bar-iphone-se {
+    max-width: 14rem /* 224px */;
+  }
+
+ 
+  @media (width >= 120rem /* 1920px */) {
+    .text-for-1920px {
+      font-size: var(--text-9xl) /* 8rem = 128px */;
+      line-height: var(--tw-leading, var(--text-9xl--line-height) /* 1 */);
+    }
+  }
+
 }
