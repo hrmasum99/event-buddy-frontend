@@ -45,7 +45,7 @@ export default function PreviousEvents() {
 
       {/* Pagination for Previous Events */}
       {previousEventsData?.meta && previousEventsData.meta.total_pages > 1 && (
-        <div className="flex justify-center pt-6">
+        <div className="flex justify-center pt-8">
           <PaginationWithEllipsis
             currentPage={previousPage}
             totalPages={previousEventsData.meta.total_pages}

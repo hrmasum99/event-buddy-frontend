@@ -92,7 +92,7 @@ export default function PaginationWithEllipsis({
             className={
               currentPage <= 1
                 ? "pointer-events-none opacity-50"
-                : "cursor-pointer hover:bg-gray-100"
+                : "cursor-pointer hover:text-white hover:bg-[#4157FE]"
             }
           />
         </PaginationItem>
@@ -110,7 +110,11 @@ export default function PaginationWithEllipsis({
                   handlePageClick(page as number);
                 }}
                 isActive={currentPage === page}
-                className="cursor-pointer hover:bg-gray-100"
+                className={
+                  currentPage === page
+                    ? "pointer-events-none text-white bg-[#4157FE]"
+                    : "cursor-pointer hover:text-white hover:bg-[#4157FE]"
+                }
               >
                 {page}
               </PaginationLink>
@@ -131,7 +135,7 @@ export default function PaginationWithEllipsis({
             className={
               currentPage >= totalPages
                 ? "pointer-events-none opacity-50"
-                : "cursor-pointer hover:bg-gray-100"
+                : "cursor-pointer hover:text-white hover:bg-[#4157FE]"
             }
           />
         </PaginationItem>

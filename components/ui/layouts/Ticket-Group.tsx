@@ -13,6 +13,7 @@ import {
 import { useAuth } from "@/redux/customHooks";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useGetEventByIdQuery } from "@/redux/services/eventApi";
 
 interface TicketGroupProps {
   eventId: number;
@@ -20,14 +21,16 @@ interface TicketGroupProps {
 
 export default function TicketGroup({ eventId }: TicketGroupProps) {
   const [selectedSeats, setSelectedSeats] = useState("1");
-  const { user } = useAuth();
+  const { user, getRole } = useAuth();
   const router = useRouter();
 
   const { data: seatData, isLoading: isLoadingSeats } =
     useGetAvailableSeatsQuery(eventId);
+  const { data: eventInfo } = useGetEventByIdQuery(eventId);
   const [createBooking, { isLoading: isBooking }] = useCreateBookingMutation();
 
   const availableSeats = seatData?.data?.availableSeats || 0;
+  const eventDate = eventInfo?.date;
 
   // Generate options based on available seats
   const options = Array.from(
@@ -182,6 +185,7 @@ export default function TicketGroup({ eventId }: TicketGroupProps) {
   console.log("Is booking:", isBooking);
   console.log("Is loading seats:", isLoadingSeats);
   console.log("================================");
+  console.log("Event Date:", eventDate);
 
   if (availableSeats === 0) {
     return (
@@ -248,13 +252,18 @@ export default function TicketGroup({ eventId }: TicketGroupProps) {
       </CardContent>
 
       <CardFooter className="flex justify-center w-full pb-2">
-        <Button
-          className="bg-[#4157FE] text-white hover:bg-[#7B8BFF] disabled:bg-gray-400"
-          onClick={handleBookSeat}
-          disabled={isBooking || availableSeats === 0}
-        >
-          {isBooking ? "Booking..." : "Book Seat"}
-        </Button>
+        {getRole() === "admin" ||
+        (eventDate && new Date(eventDate).getTime() <= Date.now()) ? (
+          <Button disabled>Book Seat</Button>
+        ) : (
+          <Button
+            className="bg-[#4157FE] text-white hover:bg-[#7B8BFF] disabled:bg-gray-400"
+            onClick={handleBookSeat}
+            disabled={isBooking || availableSeats === 0}
+          >
+            {isBooking ? "Booking..." : "Book Seat"}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
