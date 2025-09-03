@@ -121,7 +121,7 @@ export interface AuthState {
   user: IUser | null;
   access_token: string | null;
   isAuthenticated: boolean;
-  isHydrated: boolean;
+  isHydrated: boolean; // Re-enable hydration tracking
 }
 
 const initialState: AuthState = {
@@ -141,47 +141,54 @@ const authSlice = createSlice({
     setLoggedInUser(state, action: PayloadAction<LoggedInUserPayload>) {
       state.access_token = action.payload.access_token;
       state.user = action.payload.user;
-      state.isAuthenticated = true;
+      // Fix: Ensure consistent authentication state
+      state.isAuthenticated = !!(
+        action.payload.access_token && action.payload.user
+      );
       state.isHydrated = true;
 
       // Store in cookies
       Cookies.set(ACCESS_TOKEN_KEY, action.payload.access_token);
       Cookies.set(AUTH_KEY, JSON.stringify(action.payload));
     },
+
     setUser: (state, action: PayloadAction<IUser>) => {
       state.user = action.payload;
-      state.isAuthenticated = !!action.payload;
+      // Fix: Only set authenticated if we also have a token
+      state.isAuthenticated = !!(action.payload && state.access_token);
       state.isHydrated = true;
     },
+
     logout: (state) => {
-      // Clear state first
+      // Clear state
       state.access_token = null;
       state.isAuthenticated = false;
       state.user = null;
       state.isHydrated = true;
 
-      // Clear cookies with error handling
+      // Clear cookies
       try {
         Cookies.remove(AUTH_KEY);
         Cookies.remove(ACCESS_TOKEN_KEY);
 
-        // Also clear any other auth-related cookies you might have
-        // Cookies.remove('refreshToken');
-
-        // Clear localStorage if you're also storing anything there
-        // if (typeof window !== "undefined") {
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
-        // }
+        // Clear any localStorage items if they exist
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+        }
       } catch (error) {
-        console.error("Error clearing cookies/localStorage:", error);
+        console.error("Error clearing auth data:", error);
       }
     },
+
     setAccessToken: (state, action: PayloadAction<string>) => {
       state.access_token = action.payload;
-      state.isAuthenticated = true;
+      // Fix: Set authenticated to true when token is set (assuming user will be fetched)
+      state.isAuthenticated = !!action.payload;
+      state.isHydrated = true;
       Cookies.set(ACCESS_TOKEN_KEY, action.payload);
     },
+
     setTokens: (
       state,
       action: PayloadAction<{
@@ -189,32 +196,54 @@ const authSlice = createSlice({
       }>
     ) => {
       state.access_token = action.payload.access_token;
-      state.isAuthenticated = true;
+      // Fix: Set authenticated to true when token is set
+      state.isAuthenticated = !!action.payload.access_token;
+      state.isHydrated = true;
       Cookies.set(ACCESS_TOKEN_KEY, action.payload.access_token);
     },
+
+    // Re-enable hydration management
     setHydrated: (state) => {
       state.isHydrated = true;
     },
-    initializeAuth: (state) => {
-      // if (typeof window !== "undefined") {
-      const authData = Cookies.get(AUTH_KEY);
-      const token = Cookies.get(ACCESS_TOKEN_KEY);
 
-      if (authData && token) {
-        try {
-          const parsed = JSON.parse(authData);
-          state.user = parsed.user;
-          state.access_token = token;
-          state.isAuthenticated = true;
-        } catch (error) {
-          console.error("Error parsing auth data from cookies:", error);
-          // Clear corrupted cookies
-          Cookies.remove(AUTH_KEY);
-          Cookies.remove(ACCESS_TOKEN_KEY);
+    // Fix: Proper initialization from cookies
+    initializeAuth: (state) => {
+      if (typeof window !== "undefined") {
+        const authData = Cookies.get(AUTH_KEY);
+        const token = Cookies.get(ACCESS_TOKEN_KEY);
+
+        if (authData && token) {
+          try {
+            const parsed = JSON.parse(authData);
+            if (parsed.user && token) {
+              state.user = parsed.user;
+              state.access_token = token;
+              state.isAuthenticated = true;
+            }
+          } catch (error) {
+            console.error("Error parsing auth data from cookies:", error);
+            // Clear corrupted cookies
+            Cookies.remove(AUTH_KEY);
+            Cookies.remove(ACCESS_TOKEN_KEY);
+            state.isAuthenticated = false;
+            state.user = null;
+            state.access_token = null;
+          }
         }
+        state.isHydrated = true;
       }
+    },
+
+    // Add action to clear auth state when token is invalid
+    clearAuthState: (state) => {
+      state.access_token = null;
+      state.isAuthenticated = false;
+      state.user = null;
       state.isHydrated = true;
-      // }
+
+      Cookies.remove(AUTH_KEY);
+      Cookies.remove(ACCESS_TOKEN_KEY);
     },
   },
 });
@@ -227,6 +256,7 @@ export const {
   setTokens,
   setHydrated,
   initializeAuth,
+  clearAuthState,
 } = authSlice.actions;
 
 export const selectAuth = (state: RootState) => state.auth;

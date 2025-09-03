@@ -300,29 +300,82 @@
   } */
 
   
-  @media (width >= 100rem /* 1600px */) {
-    .text-mac-air {
-      font-size: 7rem /* 112px */;
-      line-height: var(--tw-leading, var(--text-8xl--line-height) /* 1 */);
-    }
-  }
+  /* Base classes */
+.search-bar-iphone-se {
+  max-width: 14rem; /* 224px */
+}
 
-  @media (width >= 24rem /* 384px */) {
-    .search-bar-iphone {
-      max-width: 18rem /* 288px */;
-    }
-  }
+.search-bar-iphone {
+  max-width: 14rem; /* 224px - same as SE for consistency */
+}
 
-  .search-bar-iphone-se {
-    max-width: 14rem /* 224px */;
-  }
+.mobile-max-width {
+  max-width: 15rem; /* 240px */
+}
 
- 
-  @media (width >= 120rem /* 1920px */) {
+.mobile-text-size {
+  font-size: 12px;
+}
+
+.mobile-header-size {
+  font-size: 20px;
+}
+
+.text-mac-air {
+  font-size: 1.25rem; /* 20px - base mobile size */
+  line-height: 1.2;
+}
+
+@media (width >= 120rem/* 1920px */) {
     .text-for-1920px {
       font-size: var(--text-9xl) /* 8rem = 128px */;
       line-height: var(--tw-leading, var(--text-9xl--line-height) /* 1 */);
     }
   }
+
+
+/* Responsive breakpoints */
+@media (min-width: 24rem) { /* 384px */
+  .search-bar-iphone {
+    max-width: 18rem; /* 288px */
+  }
+}
+
+@media (min-width: 30rem) { /* 480px */
+  .mobile-max-width {
+    max-width: 20rem; /* 320px */
+    font-size: 8px;
+  }
+  
+  .mobile-text-size {
+    font-size: 14px;
+  }
+  
+  .mobile-header-size {
+    font-size: 24px;
+  }
+}
+
+@media (min-width: 48rem) { /* 768px - sm */
+  .search-bar-iphone-se,
+  .search-bar-iphone {
+    max-width: 24rem; /* 384px */
+  }
+}
+
+@media (min-width: 896px) and (max-width: 1023px) {
+  .text-tab {
+    font-size: 3.375rem; /* 54px */
+    line-height: 1;
+  }
+}
+
+
+@media (min-width: 64rem) { /* 1024px - lg */  
+  .search-bar-iphone-se,
+  .search-bar-iphone {
+    max-width: 28rem; /* 448px */
+  }
+}
 
 }

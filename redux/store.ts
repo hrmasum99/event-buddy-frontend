@@ -14,6 +14,9 @@ import { authApi } from "./services/authApi";
 import storage from "./ssrSafeStorage";
 import { eventApi } from "./services/eventApi";
 import { bookingApi } from "./services/bookingApi";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { initializeAuth } from "./features/authSlice";
 const persistConfig = {
   key: "root", // Key for the persisted state in storage
   storage, // Storage engine (localStorage on client, noop on server)

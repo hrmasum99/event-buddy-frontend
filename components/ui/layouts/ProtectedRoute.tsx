@@ -1,8 +1,10 @@
 "use client";
 
 import { useAuth } from "@/redux/customHooks";
+import { selectAuth } from "@/redux/features/authSlice";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -17,51 +19,52 @@ export default function ProtectedRoute({
   requireAuth = true,
   fallbackRoute = "/signin",
 }: ProtectedRouteProps) {
-  const { isAuthenticated, isHydrated, user, getRole } = useAuth();
   const router = useRouter();
+  const { isAuthenticated, user, getRole, isHydrated } = useAuth();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
-    // Wait for hydration to complete
+    // Wait for hydration before making routing decisions
     if (!isHydrated) return;
 
     // Check authentication requirement
     if (requireAuth && !isAuthenticated) {
-      router.push(fallbackRoute);
+      setIsRedirecting(true);
+      router.replace(fallbackRoute);
       return;
     }
 
-    // Check role-based access
-    if (
-      requiredRole &&
-      getRole()?.toLowerCase() !== requiredRole.toLowerCase()
-    ) {
-      // Redirect unauthorized users to appropriate dashboard
-      const userRole = getRole()?.toLowerCase();
-      if (userRole === "admin") {
-        router.push("/admin");
-      } else if (userRole === "user") {
-        router.push("/user");
-      } else {
-        router.push("/");
+    // Check role requirement
+    if (requiredRole && user) {
+      const userRole = user.role?.toLowerCase();
+      const requiredRoleLower = requiredRole.toLowerCase();
+
+      if (userRole !== requiredRoleLower) {
+        setIsRedirecting(true);
+        // Redirect to appropriate dashboard based on user's actual role
+        const redirectRoute =
+          userRole === "admin" ? "/admin" : userRole === "user" ? "/user" : "/";
+        router.replace(redirectRoute);
+        return;
       }
-      return;
     }
+
+    setIsRedirecting(false);
   }, [
-    isAuthenticated,
     isHydrated,
+    isAuthenticated,
     user,
     requiredRole,
     requireAuth,
     router,
-    getRole,
     fallbackRoute,
   ]);
 
-  // Show loading during hydration
-  if (!isHydrated) {
+  // Show loading while hydrating or redirecting
+  if (!isHydrated || isRedirecting) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4157FE]"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4157FE]"></div>
       </div>
     );
   }
@@ -71,7 +74,10 @@ export default function ProtectedRoute({
     return null;
   }
 
-  if (requiredRole && getRole()?.toLowerCase() !== requiredRole.toLowerCase()) {
+  if (
+    requiredRole &&
+    user?.role?.toLowerCase() !== requiredRole.toLowerCase()
+  ) {
     return null;
   }
 

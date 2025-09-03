@@ -12,72 +12,54 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/redux/customHooks";
-import { logout } from "@/redux/features/authSlice";
+
+import { logout, selectAuth } from "@/redux/features/authSlice";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 import {
   LogOut,
   UserRoundIcon,
   LayoutDashboard,
   MoreVertical,
-  Menu,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { useState, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useState, useCallback, useEffect } from "react";
+import { useAuth } from "@/redux/customHooks";
 
 export default function MainNav() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const auth = useSelector(selectAuth);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  // Use the useAuth hook for consistent auth state
   const {
     isAuthenticated,
-    isHydrated,
-    getLastName,
-    getInitials,
-    isProfileLoading,
     user,
+    getLastName,
     getDashboardRoute,
-    getRole,
+    getInitials,
+    isHydrated,
   } = useAuth();
 
-  // Remove manual initialization - Redux Persist handles this
-
-  const handleLogout = useCallback(() => {
-    if (isLoggingOut) return; // Prevent double clicks
-
+  const handleLogout = useCallback(async () => {
     setIsLoggingOut(true);
-
-    // Dispatch logout action (synchronous)
-    dispatch(logout());
-
-    // Use requestAnimationFrame to ensure DOM updates before navigation
-    requestAnimationFrame(() => {
+    try {
+      dispatch(logout());
       router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
       setIsLoggingOut(false);
-    });
-  }, [dispatch, router, isLoggingOut]);
+    }
+  }, [dispatch, router]);
 
-  // Show loading state during initial hydration
+  // Show loading state until hydrated
   if (!isHydrated) {
     return (
-      <div>
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem className="flex gap-4 items-center">
-              <div className="flex gap-2">
-                <Button className="bg-[#4157FE] text-white hover:bg-[#7B8BFF]">
-                  <Link href="/signin">Sign in</Link>
-                </Button>
-                <Button className="bg-[#4157FE] text-white hover:bg-[#7B8BFF]">
-                  <Link href="/signup">Sign up</Link>
-                </Button>
-              </div>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+      <div className="flex items-center justify-end">
+        <div className="animate-pulse bg-gray-200 h-10 w-32 rounded"></div>
       </div>
     );
   }
@@ -103,24 +85,20 @@ export default function MainNav() {
                 <div className="flex gap-2 items-center">
                   <Avatar className="rounded-full border border-[#250A63] w-8 h-8 flex items-center justify-center">
                     <AvatarFallback className="flex items-center justify-center rounded-full w-full h-full bg-gray-200">
-                      {isProfileLoading ? (
-                        <UserRoundIcon className="h-4 w-4" />
-                      ) : (
-                        <span className="text-sm font-semibold text-[#250A63]">
-                          {getInitials()}
-                        </span>
-                      )}
+                      <span className="text-sm font-semibold text-[#250A63]">
+                        {getInitials()}
+                      </span>
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="flex flex-col">
                     <span className="font-medium text-[#250A63]">
-                      {isProfileLoading ? "Loading..." : getLastName()}
+                      {getLastName()}
                     </span>
                     {/* Show role badge */}
-                    {getRole() && (
+                    {user?.role && (
                       <span className="text-xs text-gray-500 capitalize">
-                        {getRole()}
+                        {user.role}
                       </span>
                     )}
                   </div>
@@ -154,10 +132,9 @@ export default function MainNav() {
                 <div className="sm:hidden">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      {/* <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreVertical className="h-4 w-4"/>
-                      </Button> */}
-                      <Menu className="h-8 w-8 text-[#250A63]" />
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem asChild>
