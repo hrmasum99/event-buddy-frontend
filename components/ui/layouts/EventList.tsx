@@ -340,7 +340,7 @@ export default function EventList() {
   }
 
   return (
-    <div className="w-full space-y-4 py-6">
+    <div className="w-full space-y-4 pb-6">
       {/* Header with stats */}
       <div className="flex justify-between items-center">
         <div className="text-sm text-muted-foreground">

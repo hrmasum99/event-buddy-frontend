@@ -45,7 +45,7 @@ export default function UpcommingEvents() {
 
       {/* Pagination for Upcoming Events */}
       {upcomingEventsData?.meta && upcomingEventsData.meta.total_pages > 1 && (
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-6">
           <PaginationWithEllipsis
             currentPage={upcomingPage}
             totalPages={upcomingEventsData.meta.total_pages}
