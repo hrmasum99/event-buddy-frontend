@@ -6,9 +6,16 @@ import {
 import { RootState } from "../rootReducer";
 import {
   NEXT_PUBLIC_API_BOOKINGS_AVAILABLE_SEATS,
+  NEXT_PUBLIC_API_BOOKINGS_DETAIL,
   NEXT_PUBLIC_API_BOOKINGS_MY,
   NEXT_PUBLIC_API_BOOKINGS_NEW,
   NEXT_PUBLIC_API_BOOKINGS_CANCEL,
+  NEXT_PUBLIC_API_DOCUMENTS_INVOICE,
+  NEXT_PUBLIC_API_DOCUMENTS_TICKET,
+  NEXT_PUBLIC_API_DOCUMENTS_ALL_INVOICES,
+  NEXT_PUBLIC_API_DOCUMENTS_ALL_TICKETS,
+  NEXT_PUBLIC_API_DOCUMENTS_MY_INVOICES,
+  NEXT_PUBLIC_API_DOCUMENTS_MY_TICKETS,
 } from "../endpoints";
 
 export const bookingApi = createApi({
@@ -23,7 +30,7 @@ export const bookingApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Booking", "SeatInfo"],
+  tagTypes: ["Booking", "SeatInfo", "Document"],
   endpoints: (builder) => ({
     // Get available seats for an event
     getAvailableSeats: builder.query<ApiSuccessResponse<ISeatInfo>, number>({
@@ -32,6 +39,20 @@ export const bookingApi = createApi({
       providesTags: (result, error, eventId) => [
         { type: "SeatInfo", id: eventId },
       ],
+    }),
+
+    // Get single booking by ID
+    getBookingById: builder.query<IBooking, string | number>({
+      query: (id) => ({
+        url: `${NEXT_PUBLIC_API_BOOKINGS_DETAIL}${id}`,
+      }),
+      transformResponse: (response: ApiSuccessResponse<IBooking>) =>
+        response.data,
+      transformErrorResponse: (response: FetchBaseQueryError) => ({
+        status: response.status,
+        data: response.data as ApiErrorResponse,
+      }),
+      providesTags: (result, error, id) => [{ type: "Booking", id }],
     }),
 
     // Get user's bookings
@@ -51,28 +72,13 @@ export const bookingApi = createApi({
     // Create new booking
     createBooking: builder.mutation<
       ApiSuccessResponse<IBooking>,
-      { eventId: number; seatsBooked: number }
+      { eventId: number; quantity: number }
     >({
-      query: ({ eventId, seatsBooked }) => {
-        const url = `${NEXT_PUBLIC_API_BOOKINGS_NEW}${eventId}`;
-        const body = { seatsBooked: seatsBooked };
-
-        console.log("Booking API - Making request:", {
-          url: url,
-          fullUrl: `${process.env.NEXT_PUBLIC_API_BASE_URL}${url}`,
-          method: "POST",
-          body: body,
-          eventId,
-          seatsBooked,
-          endpoint: NEXT_PUBLIC_API_BOOKINGS_NEW,
-        });
-
-        return {
-          url: url,
-          method: "POST",
-          body: body,
-        };
-      },
+      query: ({ eventId, quantity }) => ({
+        url: `${NEXT_PUBLIC_API_BOOKINGS_NEW}${eventId}`,
+        method: "POST",
+        body: { quantity },
+      }),
       transformResponse: (response: ApiSuccessResponse<IBooking>) => response,
       transformErrorResponse: (response: FetchBaseQueryError) => ({
         status: response.status,
@@ -100,12 +106,50 @@ export const bookingApi = createApi({
       },
       invalidatesTags: ["Booking"],
     }),
+
+    // ======= DOCUMENT APIs =======
+    getInvoiceById: builder.query<ApiSuccessResponse<any>, number>({
+      query: (id) => `${NEXT_PUBLIC_API_DOCUMENTS_INVOICE}${id}`,
+      providesTags: ["Document"],
+    }),
+
+    getTicketById: builder.query<ApiSuccessResponse<any>, number>({
+      query: (id) => `${NEXT_PUBLIC_API_DOCUMENTS_TICKET}${id}`,
+      providesTags: ["Document"],
+    }),
+
+    getAllInvoices: builder.query<ApiSuccessResponse<any[]>, void>({
+      query: () => NEXT_PUBLIC_API_DOCUMENTS_ALL_INVOICES,
+      providesTags: ["Document"],
+    }),
+
+    getAllTickets: builder.query<ApiSuccessResponse<any[]>, void>({
+      query: () => NEXT_PUBLIC_API_DOCUMENTS_ALL_TICKETS,
+      providesTags: ["Document"],
+    }),
+
+    getMyInvoices: builder.query<ApiSuccessResponse<any[]>, void>({
+      query: () => NEXT_PUBLIC_API_DOCUMENTS_MY_INVOICES,
+      providesTags: ["Document"],
+    }),
+
+    getMyTickets: builder.query<ApiSuccessResponse<any[]>, void>({
+      query: () => NEXT_PUBLIC_API_DOCUMENTS_MY_TICKETS,
+      providesTags: ["Document"],
+    }),
   }),
 });
 
 export const {
   useGetAvailableSeatsQuery,
+  useGetBookingByIdQuery,
   useGetMyBookingsQuery,
   useCreateBookingMutation,
   useCancelBookingMutation,
+  useGetAllInvoicesQuery,
+  useGetAllTicketsQuery,
+  useGetInvoiceByIdQuery,
+  useGetMyInvoicesQuery,
+  useGetMyTicketsQuery,
+  useGetTicketByIdQuery,
 } = bookingApi;

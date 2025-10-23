@@ -115,6 +115,7 @@ import Cookies from "js-cookie";
 type LoggedInUserPayload = {
   user: IUser;
   access_token: string;
+  twoFactorRequired: boolean;
 };
 
 export interface AuthState {
@@ -122,6 +123,7 @@ export interface AuthState {
   access_token: string | null;
   isAuthenticated: boolean;
   isHydrated: boolean; // Re-enable hydration tracking
+  twoFactorRequired: boolean;
 }
 
 const initialState: AuthState = {
@@ -129,6 +131,7 @@ const initialState: AuthState = {
   access_token: null,
   isAuthenticated: false,
   isHydrated: false,
+  twoFactorRequired: false,
 };
 
 const AUTH_KEY = `${process.env.NEXT_PUBLIC_AUTH_KEY}`;
@@ -146,6 +149,7 @@ const authSlice = createSlice({
         action.payload.access_token && action.payload.user
       );
       state.isHydrated = true;
+      state.twoFactorRequired = action.payload.twoFactorRequired;
 
       // Store in cookies
       Cookies.set(ACCESS_TOKEN_KEY, action.payload.access_token);
@@ -157,6 +161,10 @@ const authSlice = createSlice({
       // Fix: Only set authenticated if we also have a token
       state.isAuthenticated = !!(action.payload && state.access_token);
       state.isHydrated = true;
+    },
+
+    set2FAEnabled: (state, action: PayloadAction<boolean>) => {
+      state.twoFactorRequired = action.payload;
     },
 
     logout: (state) => {
@@ -253,6 +261,7 @@ export const {
   setUser,
   logout,
   setAccessToken,
+  set2FAEnabled,
   setTokens,
   setHydrated,
   initializeAuth,

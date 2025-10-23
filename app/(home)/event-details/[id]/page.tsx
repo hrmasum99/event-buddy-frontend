@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import EventDetailsCard from "@/components/ui/layouts/EventDetailsCard";
 import { getEventById } from "@/lib/getEventById";
+// import { useGetEventByIdQuery } from "@/redux/services/eventApi";
 
 interface EventDetailsProps {
   params: Promise<{ id: string }>; // Changed: params is now a Promise
@@ -13,6 +14,7 @@ export default async function EventDetails({ params }: EventDetailsProps) {
 
   // fetch event by ID
   const event = await getEventById(id);
+  // const { data: eventInfo } = useGetEventByIdQuery(id);
 
   if (!event) {
     return (

@@ -14,23 +14,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { logout, selectAuth } from "@/redux/features/authSlice";
+
+import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@radix-ui/react-avatar";
 import {
   LogOut,
   UserRoundIcon,
   LayoutDashboard,
   MoreVertical,
+  ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/redux/customHooks";
+import { useGetMyBookingsQuery } from "@/redux/services/bookingApi";
 
 export default function MainNav() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const auth = useSelector(selectAuth);
+  // const auth = useSelector(selectAuth);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Use the useAuth hook for consistent auth state
@@ -41,7 +45,16 @@ export default function MainNav() {
     getDashboardRoute,
     getInitials,
     isHydrated,
+    getRole,
   } = useAuth();
+
+  // Get pending bookings count for cart badge
+  const { data: bookingsData } = useGetMyBookingsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  const pendingBookingsCount =
+    bookingsData?.data?.filter((b: any) => b.status === "PENDING")?.length || 0;
 
   const handleLogout = useCallback(async () => {
     setIsLoggingOut(true);
@@ -103,6 +116,31 @@ export default function MainNav() {
                     )}
                   </div>
                 </div>
+
+                {/* Cart Button - Shows for all authenticated users */}
+                {getRole() === "user" && (
+                  <div className="relative">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="relative h-10 w-10"
+                      asChild
+                    >
+                      {/* 💡 FIX HERE: Add the ?tab=cart query parameter */}
+                      <Link href="/accounts?tab=cart">
+                        <ShoppingCart className="h-5 w-5" />
+                        {pendingBookingsCount > 0 && (
+                          <Badge
+                            variant="destructive"
+                            className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                          >
+                            {pendingBookingsCount}
+                          </Badge>
+                        )}
+                      </Link>
+                    </Button>
+                  </div>
+                )}
 
                 {/* Desktop Navigation - Hidden on small screens */}
                 <div className="hidden sm:flex gap-2">

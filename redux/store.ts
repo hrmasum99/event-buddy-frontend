@@ -17,6 +17,7 @@ import { bookingApi } from "./services/bookingApi";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
 import { initializeAuth } from "./features/authSlice";
+import { paymentApi } from "./services/paymentApi";
 const persistConfig = {
   key: "root", // Key for the persisted state in storage
   storage, // Storage engine (localStorage on client, noop on server)
@@ -37,7 +38,8 @@ export const makeStore = () => {
       })
         .concat(authApi.middleware)
         .concat(eventApi.middleware)
-        .concat(bookingApi.middleware), // Add RTK Query middleware
+        .concat(bookingApi.middleware)
+        .concat(paymentApi.middleware), // Add RTK Query middleware
     devTools: process.env.NODE_ENV !== "production", // Enable DevTools in development
   });
 };

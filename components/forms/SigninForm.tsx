@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -18,7 +17,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { isRtkQueryError } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,6 +27,8 @@ import { useSigninMutation } from "@/redux/services/authApi";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { setLoggedInUser } from "@/redux/features/authSlice";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useState } from "react";
 
 const FormSchema = z.object({
   email: z
@@ -42,9 +42,10 @@ const FormSchema = z.object({
   }),
 });
 
-export default function Signin() {
+export default function SigninForm() {
   const dispatch = useAppDispatch();
   const [login, { isLoading }] = useSigninMutation();
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -59,13 +60,18 @@ export default function Signin() {
     try {
       const result = await login(data).unwrap(); // This can throw RtkQueryError
 
-      if (result.success === true) {
+      if (result.success === true && result.data.twoFactorRequired) {
+        toast.success(result.message || "Two-Factor verification required!");
+        // Redirect to a protected page
+        router.push(`/2FA?email=${data.email}`);
+      } else if (result.success === true && !result.data.twoFactorRequired) {
         toast.success(result.message || "Login successful!");
         // Dispatch actions to store tokens and user info
         dispatch(
           setLoggedInUser({
             access_token: result?.data?.access_token,
             user: result?.data?.user,
+            twoFactorRequired: result?.data?.twoFactorRequired,
           })
         );
         // Redirect to a protected page
@@ -105,7 +111,10 @@ export default function Signin() {
         <CardTitle className="text-[#242565] text-xl">Sign in</CardTitle>
         <CardDescription className="mt-4 text-[#8570AD]">
           New User?
-          <Link href="/signup" className="ps-1 underline">
+          <Link
+            href="/signup"
+            className="ps-1 underline text-[#8570AD] hover:text-[#4157FE]"
+          >
             Create an account
           </Link>
         </CardDescription>
@@ -119,7 +128,7 @@ export default function Signin() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-[#242565]">Email</FormLabel>
                     <FormControl2>
                       <Input placeholder="Enter your email" {...field} />
                     </FormControl2>
@@ -132,67 +141,52 @@ export default function Signin() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <div className="flex items-center">
-                      <FormLabel>Password</FormLabel>
+                    <div className="flex items-center justify-between">
+                      <FormLabel className="text-[#242565]">Password</FormLabel>
                       <Link
-                        href="#"
-                        className="ml-auto inline-block text-sm text-[#8570AD] underline-offset-4 hover:underline"
+                        href="/forgot-password"
+                        className="text-sm text-[#8570AD] hover:text-[#4157FE] underline-offset-4 hover:underline"
                       >
-                        Forgot your password?
+                        Forgot password?
                       </Link>
                     </div>
                     <FormControl2>
-                      <Input
-                        type="password"
-                        placeholder="Enter your password"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          type={showNewPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                          {showNewPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
                     </FormControl2>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              {/* <div className="grid gap-2">
-                <Label className="text-[#242565]" htmlFor="email">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="enter your email"
-                  required
-                  className="border-2 border-[#D9D9D9]"
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label className="text-[#242565]" htmlFor="password">
-                    Password
-                  </Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm text-[#8570AD] underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="enter your password"
-                  required
-                  className="border-2 border-[#D9D9D9]"
-                />
-              </div> */}
-
-              {/* <CardFooter className="flex-col gap-2"> */}
               <Button
                 type="submit"
-                className="w-full bg-[#4157FE] hover:bg-[#7B8BFF]"
+                className="w-full bg-[#4157FE] hover:bg-[#7B8BFF] text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
                 disabled={form.formState.isSubmitting || isLoading}
               >
-                Sign In
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
               {/* </CardFooter> */}
             </div>

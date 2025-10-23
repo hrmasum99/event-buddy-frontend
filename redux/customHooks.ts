@@ -40,6 +40,7 @@ export const useAuth = () => {
         setLoggedInUser({
           user: userProfile,
           access_token: auth.access_token,
+          twoFactorRequired: userProfile.isTwoFactorEnabled,
         })
       );
     } else if (userProfile && !auth.access_token) {
@@ -90,6 +91,7 @@ export const useAuth = () => {
       (auth.isAuthenticated || !!auth.access_token) && !!currentUser,
     isHydrated: auth.isHydrated,
     isProfileLoading,
+    is2FAEnabled: auth.twoFactorRequired,
     profileError,
     refetchProfile,
 
@@ -142,7 +144,12 @@ export const useAuth = () => {
     // Get dashboard route based on role
     getDashboardRoute: () => {
       if (!currentUser?.role) return "/";
-      return currentUser.role.toLowerCase() === "admin" ? "/admin" : "/user";
+      // return currentUser.role.toLowerCase() === "admin" ? "/admin" : "/user";
+      return "/accounts";
     },
+
+    // isAuth: () => {
+    //   if (!auth.isAuthenticated) return "/";
+    // },
   };
 };

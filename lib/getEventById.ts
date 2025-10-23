@@ -6,15 +6,15 @@ export async function getEventById(id: string): Promise<IEvent | null> {
       return null;
     }
 
-    const apiBaseUrl =
-      process.env.NEXT_PUBLIC_API_BASE_URL || process.env.API_BASE_URL;
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
     if (!apiBaseUrl) {
       console.error("API Base URL not configured");
       return null;
     }
 
-    const url = `${apiBaseUrl}/events/${encodeURIComponent(id)}`;
+    // const url = `${apiBaseUrl}/events/${encodeURIComponent(id)}`;
+    const url = `${apiBaseUrl}/events/get-event/${encodeURIComponent(id)}`;
 
     const response = await fetch(url, {
       method: "GET",
