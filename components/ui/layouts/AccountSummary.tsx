@@ -36,10 +36,13 @@ const COLORS = ["#4157FE", "#7B8BFF", "#FF6B6B", "#4ECDC4", "#FFE66D"];
 export default function AccountOverview() {
   const { user } = useAuth();
   const { data: bookingsResponse } = useGetMyBookingsQuery();
-  const { data: myPaymentsResponse } = useGetMyPaymentsQuery();
-  const { data: allPaymentsResponse } = useGetAllPaymentsQuery(undefined, {
-    skip: user?.role !== "admin",
-  });
+  const { data: myPaymentsResponse } = useGetMyPaymentsQuery({});
+  const { data: allPaymentsResponse } = useGetAllPaymentsQuery(
+    {},
+    {
+      skip: user?.role !== "admin",
+    }
+  );
   const { data: eventsResponse } = useGetAllEventsQuery(
     { page: 1, limit: 100 },
     { skip: user?.role !== "admin" }
@@ -548,11 +551,3 @@ export default function AccountOverview() {
     </div>
   );
 }
-
-// export default function AccountSummary() {
-//   return (
-//     <>
-//       <h1>Account Summary</h1>
-//     </>
-//   );
-// }
