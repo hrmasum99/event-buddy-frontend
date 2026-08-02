@@ -31,11 +31,15 @@ export default function EventDetailsCard({ event }: EventDetailsCardProps) {
     <Card className="w-full max-w-full shadow-none pt-0 border-0 rounded-none bg-[#FBFBFE]">
       <div className="w-full h-auto">
         <Image
-          src={event.imageUrl || "/conference.png"}
-          alt={event.title}
-          width={3840}
-          height={2560}
-          priority
+          src={event?.imageUrl || "/conference.png"}
+          alt={event?.title || "Event Image"}
+          width={1200}
+          height={500}
+          className="w-full h-[400px] object-cover rounded-xl"
+          onError={(e) => {
+            // Fallback if image fails to render
+            e.currentTarget.src = "/conference.png";
+          }}
         />
       </div>
 

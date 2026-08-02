@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { z } from "zod";
 import {
   useCreateEventMutation,
   useUpdateEventMutation,
@@ -36,12 +37,58 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "../../ToastContext";
 
+// ==========================================
+// 1. DEFINING THE ZOD VALIDATION SCHEMA
+// ==========================================
+const eventFormSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(3, { message: "Title must be at least 3 characters long" }),
+  date: z
+    .string()
+    .min(1, { message: "Date is required" })
+    .refine(
+      (val) => {
+        const selectedDate = new Date(val);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return selectedDate >= today;
+      },
+      { message: "Date cannot be in the past" },
+    ),
+  time: z.string().optional(),
+  description: z
+    .string()
+    .trim()
+    .min(10, { message: "Description must be at least 10 characters long" }),
+  location: z.string().trim().min(2, { message: "Location is required" }),
+  capacity: z
+    .string()
+    .min(1, { message: "Capacity is required" })
+    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+      message: "Capacity must be a valid positive number",
+    }),
+  ticketPrice: z
+    .string()
+    .trim()
+    .min(1, { message: "Ticket price is required" })
+    .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
+      message: "Enter a valid ticket price (0 or higher)",
+    }),
+  tags: z.string().optional(),
+  imageFile: z.instanceof(File).nullable().optional(),
+});
+
+type EventFormValues = z.infer<typeof eventFormSchema>;
+
 interface EventData {
   id?: string | number;
   title?: string;
   date?: string;
   location?: string;
   totalSeats?: number;
+  ticketPrice?: string;
   tags?: string;
   description?: string;
   imageUrl?: string;
@@ -72,15 +119,16 @@ export default function EventModal({
   const isSubmitting = isCreating || isUpdating || isUploading;
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EventFormValues>({
     title: "",
     date: "",
     time: "",
     description: "",
     location: "",
     capacity: "",
+    ticketPrice: "",
     tags: "",
-    imageFile: null as File | null,
+    imageFile: null,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -100,6 +148,7 @@ export default function EventModal({
         description: eventData.description || "",
         location: eventData.location || "",
         capacity: eventData.totalSeats?.toString() || "",
+        ticketPrice: eventData.ticketPrice?.toString() || "",
         tags: eventData.tags || "",
         imageFile: null,
       });
@@ -116,6 +165,7 @@ export default function EventModal({
         description: "",
         location: "",
         capacity: "",
+        ticketPrice: "",
         tags: "",
         imageFile: null,
       });
@@ -124,41 +174,35 @@ export default function EventModal({
     setErrors({});
   }, [isEdit, eventData, open]);
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  // ==========================================
+  // 2. VALIDATE FORM USING ZOD
+  // ==========================================
+  const validateForm = (): boolean => {
+    const validationResult = eventFormSchema.safeParse(formData);
 
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required";
+    if (!validationResult.success) {
+      const fieldErrors: Record<string, string> = {};
+      const formattedErrors = validationResult.error.format();
+
+      // Map Zod errors to field name keys
+      Object.keys(formattedErrors).forEach((key) => {
+        if (key !== "_errors") {
+          const errArray = (formattedErrors as any)[key]?._errors;
+          if (errArray && errArray.length > 0) {
+            fieldErrors[key] = errArray[0];
+          }
+        }
+      });
+
+      setErrors(fieldErrors);
+      return false;
     }
 
-    if (!formData.date) {
-      newErrors.date = "Date is required";
-    } else {
-      const selectedDate = new Date(formData.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (selectedDate < today) {
-        newErrors.date = "Date cannot be in the past";
-      }
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
-    }
-
-    if (!formData.location.trim()) {
-      newErrors.location = "Location is required";
-    }
-
-    if (!formData.capacity) {
-      newErrors.capacity = "Capacity is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors({});
+    return true;
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: keyof EventFormValues, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -244,7 +288,8 @@ export default function EventModal({
         description: formData.description.trim(),
         location: formData.location.trim(),
         totalSeats: parseInt(formData.capacity),
-        tags: formData.tags.trim(),
+        ticketPrice: formData.ticketPrice.trim(),
+        tags: formData.tags?.trim() || "",
       };
 
       let result;
@@ -289,7 +334,9 @@ export default function EventModal({
       } the event. Please try again.`;
 
       if (error?.data?.message) {
-        errorMessage = error.data.message;
+        errorMessage = Array.isArray(error.data.message)
+          ? error.data.message.join(", ")
+          : error.data.message;
       }
 
       showToast({
@@ -342,7 +389,6 @@ export default function EventModal({
               className={`h-12 text-lg border-2 transition-all duration-200 focus:border-[#4157FE] focus:shadow-lg ${
                 errors.title ? "border-red-500" : "border-gray-200"
               }`}
-              required
             />
             {errors.title && (
               <p className="text-red-500 text-sm">{errors.title}</p>
@@ -364,7 +410,6 @@ export default function EventModal({
                   className={`h-12 border-2 transition-all duration-200 focus:border-[#4157FE] focus:shadow-lg ${
                     errors.date ? "border-red-500" : "border-gray-200"
                   }`}
-                  required
                 />
               </div>
               {errors.date && (
@@ -399,7 +444,6 @@ export default function EventModal({
               className={`border-2 transition-all duration-200 focus:border-[#4157FE] focus:shadow-lg resize-none ${
                 errors.description ? "border-red-500" : "border-gray-200"
               }`}
-              required
             />
             {errors.description && (
               <p className="text-red-500 text-sm">{errors.description}</p>
@@ -419,15 +463,15 @@ export default function EventModal({
               className={`h-12 border-2 transition-all duration-200 focus:border-[#4157FE] focus:shadow-lg ${
                 errors.location ? "border-red-500" : "border-gray-200"
               }`}
-              required
             />
             {errors.location && (
               <p className="text-red-500 text-sm">{errors.location}</p>
             )}
           </div>
 
-          {/* Capacity and Tags */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Capacity, Ticket Price, and Tags */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Capacity */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                 <UsersIcon className="w-4 h-4 text-[#4157FE]" />
@@ -458,13 +502,38 @@ export default function EventModal({
                 <p className="text-red-500 text-sm">{errors.capacity}</p>
               )}
             </div>
+
+            {/* Ticket Price */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                <span className="w-2 h-2 bg-[#4157FE] rounded-full"></span>
+                Ticket Price (BDT) *
+              </Label>
+              <Input
+                placeholder="e.g. 2000"
+                type="number"
+                min="0"
+                value={formData.ticketPrice}
+                onChange={(e) =>
+                  handleInputChange("ticketPrice", e.target.value)
+                }
+                className={`h-12 border-2 transition-all duration-200 focus:border-[#4157FE] focus:shadow-lg ${
+                  errors.ticketPrice ? "border-red-500" : "border-gray-200"
+                }`}
+              />
+              {errors.ticketPrice && (
+                <p className="text-red-500 text-sm">{errors.ticketPrice}</p>
+              )}
+            </div>
+
+            {/* Tags */}
             <div className="space-y-2">
               <Label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                 <TagIcon className="w-4 h-4 text-[#4157FE]" />
                 Tags
               </Label>
               <Input
-                placeholder="e.g. conference, networking, workshop"
+                placeholder="e.g. tech, AI"
                 value={formData.tags}
                 onChange={(e) => handleInputChange("tags", e.target.value)}
                 className="h-12 border-2 border-gray-200 transition-all duration-200 focus:border-[#4157FE] focus:shadow-lg"
