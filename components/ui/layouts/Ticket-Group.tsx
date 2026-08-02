@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import * as RadioGroup from "@radix-ui/react-radio-group";
-import { CircleCheck, Ticket } from "lucide-react";
+import { CircleCheck, Ticket, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardFooter, CardHeader } from "../card";
 import { Button } from "../button";
@@ -33,13 +33,12 @@ export default function TicketGroup({ eventId }: TicketGroupProps) {
   const eventDate = eventInfo?.date;
   const eventTitle = eventInfo?.title || "this event";
 
-  // Generate options based on available seats
   const options = Array.from(
     { length: Math.min(4, availableSeats) },
     (_, i) => ({
       value: (i + 1).toString(),
       label: i === 0 ? "Seat" : "Seats",
-    })
+    }),
   );
 
   const handleBookSeat = async () => {
@@ -51,14 +50,8 @@ export default function TicketGroup({ eventId }: TicketGroupProps) {
 
     const quantity = parseInt(selectedSeats);
 
-    // Frontend validation
-    if (isNaN(quantity) || quantity < 1) {
-      toast.error("Please select a valid number of seats");
-      return;
-    }
-
-    if (quantity > 4) {
-      toast.error("You can book a maximum of 4 seats");
+    if (isNaN(quantity) || quantity < 1 || quantity > 4) {
+      toast.error("You can book between 1 and 4 seats");
       return;
     }
 
@@ -74,33 +67,21 @@ export default function TicketGroup({ eventId }: TicketGroupProps) {
       }).unwrap();
 
       if (result?.data) {
-        // Success - booking created with PENDING status
         toast.success(
-          `Your seat booking for "${eventTitle}" is initiated! Check the cart to complete your payment.`,
-          {
-            duration: 5000,
-          }
+          `Seat booked for "${eventTitle}"! Redirecting to cart for payment...`,
+          { duration: 3000 },
         );
 
-        // Don't redirect - let user continue browsing or go to cart
-        // User can access cart from navbar
+        // ✅ FIX: Immediately redirect user to cart to complete payment
+        router.push("/accounts?tab=cart");
       }
     } catch (error: any) {
       console.error("Booking error:", error);
-
-      let errorMessage = "Failed to book seats. Please try again.";
-
-      if (error?.data?.message) {
-        if (Array.isArray(error.data.message)) {
-          errorMessage = error.data.message.join(". ");
-        } else {
-          errorMessage = error.data.message;
-        }
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-
-      toast.error(errorMessage);
+      const errorMessage =
+        error?.data?.message || error?.message || "Failed to book seats.";
+      toast.error(
+        Array.isArray(errorMessage) ? errorMessage.join(". ") : errorMessage,
+      );
     }
   };
 
@@ -113,19 +94,12 @@ export default function TicketGroup({ eventId }: TicketGroupProps) {
           </h5>
         </CardHeader>
         <CardContent className="px-10 pt-0">
-          <div className="animate-pulse">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-20 bg-gray-200 rounded"></div>
-              ))}
-            </div>
+          <div className="animate-pulse grid grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-20 bg-gray-200 rounded"></div>
+            ))}
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center w-full pb-2">
-          <Button disabled className="bg-gray-400">
-            Loading seats...
-          </Button>
-        </CardFooter>
       </Card>
     );
   }
@@ -143,11 +117,6 @@ export default function TicketGroup({ eventId }: TicketGroupProps) {
             Sorry, this event is fully booked. No seats are available.
           </p>
         </CardContent>
-        <CardFooter className="flex justify-center w-full pb-2">
-          <Button disabled className="bg-gray-400">
-            Fully Booked
-          </Button>
-        </CardFooter>
       </Card>
     );
   }
@@ -175,14 +144,13 @@ export default function TicketGroup({ eventId }: TicketGroupProps) {
               className={cn(
                 "relative group ring-[1px] ring-border rounded py-2 px-3 text-center cursor-pointer transition-all",
                 "data-[state=checked]:ring-2 data-[state=checked]:ring-blue-500",
-                "hover:ring-blue-300"
+                "hover:ring-blue-300",
               )}
             >
               <CircleCheck className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 h-6 w-6 text-primary fill-blue-500 stroke-white group-data-[state=unchecked]:hidden" />
               <div className="flex justify-center w-full">
                 <Ticket className="mb-2.5 text-[#242565] h-6 w-6" />
               </div>
-
               <span className="font-semibold tracking-tight text-[#242565]">
                 {option.value}
               </span>
@@ -204,7 +172,7 @@ export default function TicketGroup({ eventId }: TicketGroupProps) {
             onClick={handleBookSeat}
             disabled={isBooking || availableSeats === 0}
           >
-            {isBooking ? "Booking..." : "Book Seat"}
+            {isBooking ? "Booking..." : "Book Seat & Proceed to Cart"}
           </Button>
         )}
       </CardFooter>
