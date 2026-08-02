@@ -136,7 +136,7 @@ export const eventApi = createApi({
     >({
       query: ({ id, data }) => ({
         url: `${NEXT_PUBLIC_API_USER_UPDATE_EVENT}${id}`, // Changed endpoint
-        method: "PUT",
+        method: "PATCH",
         body: data,
         headers: {
           "Content-Type": "application/json",
@@ -187,7 +187,7 @@ export const eventApi = createApi({
         response: ApiSuccessResponse<{
           imageUrl: string;
           imagePublicId: string;
-        }>
+        }>,
       ) => response,
       transformErrorResponse: (response: FetchBaseQueryError) => ({
         status: response.status,
