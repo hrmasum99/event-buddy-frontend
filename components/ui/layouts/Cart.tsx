@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useEffect } from "react";
 
 // Timer component for countdown
 function BookingTimer({
@@ -102,22 +103,12 @@ export default function Cart() {
   const [cancelBooking, { isLoading: isCancelling }] =
     useCancelBookingMutation();
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(
-    null
+    null,
   );
 
-  // Debug: Log the bookings data
-  useEffect(() => {
-    if (bookingsData) {
-      console.log("Bookings Data:", bookingsData);
-      console.log("All bookings:", bookingsData?.data);
-    }
-  }, [bookingsData]);
-
-  // Filter PENDING bookings - check both 'status' and 'PENDING' string
+  // Filter PENDING bookings
   const pendingBookings =
     bookingsData?.data?.filter((b: any) => {
-      console.log(`Booking ${b.id} status:`, b.status, typeof b.status);
-      // Try different possible status field names
       return (
         b.status === "PENDING" ||
         b.status?.toUpperCase() === "PENDING" ||
@@ -125,8 +116,6 @@ export default function Cart() {
         b.bookingStatus?.toUpperCase() === "PENDING"
       );
     }) || [];
-
-  console.log("Filtered pending bookings:", pendingBookings);
 
   const handleRemoveBooking = async (bookingId: number) => {
     try {
@@ -157,7 +146,6 @@ export default function Cart() {
   }
 
   if (error) {
-    console.error("Cart error:", error);
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <Card>
@@ -169,41 +157,6 @@ export default function Cart() {
             </Button>
           </CardContent>
         </Card>
-      </div>
-    );
-  }
-
-  // Debug section - remove this after testing
-  if (
-    bookingsData?.data &&
-    bookingsData.data.length > 0 &&
-    pendingBookings.length === 0
-  ) {
-    return (
-      <div className="space-y-4">
-        <Alert className="border-yellow-200 bg-yellow-50">
-          <AlertCircle className="h-4 w-4 text-yellow-600" />
-          <AlertDescription className="text-yellow-800 text-sm">
-            <strong>Debug Info:</strong> Found {bookingsData.data.length} total
-            bookings but 0 pending.
-            <details className="mt-2">
-              <summary className="cursor-pointer">
-                View booking statuses
-              </summary>
-              <pre className="text-xs mt-2 overflow-auto">
-                {JSON.stringify(
-                  bookingsData.data.map((b: any) => ({
-                    id: b.id,
-                    status: b.status,
-                    bookingStatus: b.bookingStatus,
-                  })),
-                  null,
-                  2
-                )}
-              </pre>
-            </details>
-          </AlertDescription>
-        </Alert>
       </div>
     );
   }
@@ -250,7 +203,6 @@ export default function Cart() {
         </Card>
       ) : (
         <div className="space-y-6">
-          {/* Important Notice */}
           <Alert className="border-orange-200 bg-orange-50">
             <AlertCircle className="h-4 w-4 text-orange-600" />
             <AlertDescription className="text-orange-800 text-sm">
@@ -260,13 +212,9 @@ export default function Cart() {
             </AlertDescription>
           </Alert>
 
-          {/* Booking Cards */}
           {pendingBookings.map((booking: any) => {
             const event = booking.event;
-            if (!event) {
-              console.warn(`No event found for booking ${booking.id}`);
-              return null;
-            }
+            if (!event) return null;
 
             const eventDate = new Date(event.date);
             const unitPrice = parseFloat(booking.event.ticketPrice) || 0;
@@ -280,7 +228,6 @@ export default function Cart() {
               >
                 <CardContent className="p-4 md:p-6">
                   <div className="flex flex-col lg:flex-row gap-4 md:gap-6">
-                    {/* Event Image */}
                     {event.imageUrl && (
                       <div className="w-full lg:w-48 h-48 rounded-lg overflow-hidden flex-shrink-0">
                         <Image
@@ -293,7 +240,6 @@ export default function Cart() {
                       </div>
                     )}
 
-                    {/* Event Details */}
                     <div className="flex-1 space-y-3 md:space-y-4">
                       <div>
                         <div className="flex items-start justify-between gap-4 mb-2">
@@ -308,12 +254,11 @@ export default function Cart() {
                           </Badge>
                         </div>
 
-                        {/* Timer */}
                         <BookingTimer
                           createdAt={booking.createdAt}
                           onExpire={() => {
                             toast.error(
-                              `Booking for "${event.title}" has expired`
+                              `Booking for "${event.title}" has expired`,
                             );
                             refetch();
                           }}
@@ -350,7 +295,6 @@ export default function Cart() {
 
                       <Separator />
 
-                      {/* Price Details */}
                       <div className="space-y-2">
                         <div className="flex justify-between text-xs md:text-sm">
                           <span className="text-[#8570AD]">Price per seat</span>
@@ -373,7 +317,6 @@ export default function Cart() {
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
                       <div className="flex flex-col sm:flex-row gap-3 pt-2">
                         <Button
                           onClick={() => handleProceedToPayment(booking.id)}

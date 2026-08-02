@@ -84,7 +84,7 @@ export default function EventCard({ event }: EventCardProps) {
   // const displayImage = getEventImageWithFallback(event);
 
   return (
-    <Link href={`/event-details/${encodedEventId}`}>
+    <Link href={`/event-details/${encodedEventId}`} prefetch={false}>
       <Card className="w-full max-w-full py-0 border-0 shadow-2xl gap-0">
         {/* Clickable area */}
 

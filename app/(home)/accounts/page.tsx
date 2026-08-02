@@ -1,160 +1,3 @@
-// "use client";
-
-// import { useState } from "react";
-// import { useAuth } from "@/redux/customHooks";
-// import ProtectedRoute from "@/components/ui/layouts/ProtectedRoute";
-// import { Button } from "@/components/ui/button";
-// import {
-//   LayoutDashboard,
-//   User,
-//   Lock,
-//   Shield,
-//   BarChart3,
-//   ChevronRight,
-//   Ticket,
-//   Receipt,
-//   FileText,
-// } from "lucide-react";
-// import Link from "next/link";
-// import { cn } from "@/lib/utils";
-// import AccountOverview from "@/components/ui/layouts/AccountSummary";
-// import ChangePasswordForm from "@/components/forms/ChangePasswordForm";
-// import TwoFactorAuth from "@/components/forms/TwoFactorAuth";
-// import EditProfile from "@/components/forms/EditProfile";
-// import AllTickets from "@/components/ui/layouts/AllTickets";
-// import AllInvoices from "@/components/ui/layouts/AllInvoices";
-// import MyTickets from "@/components/ui/layouts/MyTickets";
-// import MyInvoices from "@/components/ui/layouts/MyInvoices";
-// import AdminDashboard from "@/components/ui/layouts/AdminDashboard";
-// import UserDashboard from "@/components/ui/layouts/UserDashboard";
-// // import AdminDashboard from "../admin/page";
-// // import UserDashboard from "../user/page";
-
-// type TabType =
-//   | "overview"
-//   | "profile"
-//   | "password"
-//   | "2fa"
-//   | "tickets"
-//   | "invoices"
-//   | "dashboard";
-
-// export default function AccountsPage() {
-//   const { user } = useAuth();
-//   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
-//   const isAdmin = user?.role === "admin";
-
-//   const menuItems = [
-//     {
-//       id: "dashboard" as TabType,
-//       label: "Dashboard",
-//       icon: LayoutDashboard,
-//       // isLink: false,
-//       // href: isAdmin ? "/admin" : "/user",
-//       forRole: "both",
-//     },
-//     {
-//       id: "overview" as TabType,
-//       label: "Account Overview",
-//       icon: BarChart3,
-//       forRole: "both",
-//     },
-//     {
-//       id: "profile" as TabType,
-//       label: "Edit Profile",
-//       icon: User,
-//       forRole: "both",
-//     },
-//     {
-//       id: "password" as TabType,
-//       label: "Change Password",
-//       icon: Lock,
-//       forRole: "both",
-//     },
-//     {
-//       id: "2fa" as TabType,
-//       label: "Two-Factor Verification",
-//       icon: Shield,
-//       forRole: "both",
-//     },
-//     {
-//       id: "tickets" as TabType,
-//       label: isAdmin ? "All Tickets" : "My Tickets",
-//       icon: Ticket,
-//       forRole: "both",
-//     },
-//     {
-//       id: "invoices" as TabType,
-//       label: isAdmin ? "All Invoices" : "My Invoices",
-//       icon: Receipt,
-//       forRole: "both",
-//     },
-//   ];
-
-//   const renderContent = () => {
-//     switch (activeTab) {
-//       case "dashboard":
-//         return isAdmin ? <AdminDashboard /> : <UserDashboard />;
-//       case "overview":
-//         return <AccountOverview />;
-//       case "profile":
-//         return <EditProfile />;
-//       case "password":
-//         return <ChangePasswordForm />;
-//       case "2fa":
-//         return <TwoFactorAuth />;
-//       case "tickets":
-//         return isAdmin ? <AllTickets /> : <MyTickets />;
-//       case "invoices":
-//         return isAdmin ? <AllInvoices /> : <MyInvoices />;
-//       default:
-//         return isAdmin ? <AdminDashboard /> : <UserDashboard />;
-//     }
-//   };
-
-//   return (
-//     <ProtectedRoute>
-//       <div className="px-6 sm:px-14 py-6">
-//         <div className="flex flex-col lg:flex-row gap-6">
-//           {/* Desktop Sidebar - Hidden on lg screens like if size i less than 1024 then hidden */}
-//           <aside className="hidden lg:w-64 shrink-0">
-//             <nav className="bg-white rounded-lg shadow-sm border p-2 space-y-1">
-//               {menuItems.map((item) => {
-//                 return (
-//                   <Button
-//                     key={item.id}
-//                     variant="ghost"
-//                     onClick={() => setActiveTab(item.id)}
-//                     className={cn(
-//                       "w-full justify-start gap-3",
-//                       activeTab === item.id
-//                         ? "bg-[#4157FE] text-white hover:bg-[#3646D5] hover:text-white"
-//                         : "hover:bg-gray-100"
-//                     )}
-//                   >
-//                     <item.icon className="h-5 w-5" />
-//                     <span className="flex-1 text-left">{item.label}</span>
-//                   </Button>
-//                 );
-//               })}
-//             </nav>
-//           </aside>
-
-//           {/* Mobile Sidebar - menu <Menu /> for lg (1024) screens transition from left side of the screen not dropdwon*/}
-//           <div className="lg:hidden"></div>
-
-//           {/* Main Content */}
-//           <main className="flex-1">
-//             <div className="bg-white rounded-lg shadow-sm border p-6">
-//               {renderContent()}
-//             </div>
-//           </main>
-//         </div>
-//       </div>
-//     </ProtectedRoute>
-//   );
-// }
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -350,7 +193,7 @@ export default function AccountsPage() {
                     "w-full justify-start gap-3",
                     activeTab === item.id
                       ? "bg-[#4157FE] text-white hover:bg-[#3646D5] hover:text-white"
-                      : "hover:bg-gray-100"
+                      : "hover:bg-gray-100",
                   )}
                 >
                   <item.icon className="h-5 w-5" />
@@ -366,7 +209,7 @@ export default function AccountsPage() {
               "lg:hidden fixed inset-0 z-50 transition-opacity duration-300",
               isMobileMenuOpen
                 ? "opacity-100 pointer-events-auto"
-                : "opacity-0 pointer-events-none"
+                : "opacity-0 pointer-events-none",
             )}
           >
             {/* Backdrop */}
@@ -379,7 +222,7 @@ export default function AccountsPage() {
             <aside
               className={cn(
                 "absolute left-0 top-0 bottom-0 w-72 bg-white shadow-xl transition-transform duration-300 ease-in-out",
-                isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+                isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
               )}
             >
               {/* Mobile Sidebar Header */}
@@ -412,7 +255,7 @@ export default function AccountsPage() {
                       "w-full justify-start gap-3",
                       activeTab === item.id
                         ? "bg-[#4157FE] text-white hover:bg-[#3646D5] hover:text-white"
-                        : "hover:bg-gray-100"
+                        : "hover:bg-gray-100",
                     )}
                   >
                     <item.icon className="h-5 w-5" />
